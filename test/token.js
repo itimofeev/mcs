@@ -1,25 +1,31 @@
 const Token = artifacts.require('./MyToken.sol');
-const Ownable = artifacts.require('./Ownable.sol');
 
 contract('Token', accounts => {
 
   describe('Token interaction', async () => {
-    let ownableInstance;
-    beforeEach(async () => ownableInstance = await Ownable.deployed());
+    let tokenInstance;
+    beforeEach(async () => tokenInstance = await Token.deployed());
 
-    it('Should check owner', async () => {
-      assert(await ownableInstance.owner() === accounts[0]);
+    it('Should check initial balance', async () => {
+      assert((await tokenInstance.balanceOf(accounts[0])).toNumber() === 10000)
+    });
 
-      await ownableInstance.transferOwner(accounts[1]);
+    it('Should transfer tokens', async () => {
+      const transferWatcher = tokenInstance.Transfer();
 
-      assert(await ownableInstance.owner() === accounts[1]);
+      assert((await tokenInstance.balanceOf(accounts[0])).toNumber() === 10000);
 
-      try {
-        await ownableInstance.transferOwner(accounts[1], { from: accounts[2] });
-      } catch (e) {
-        return true;
-      }
-      throw new Error("I should never see this!")
+      await tokenInstance.transfer(accounts[1], 100);
+
+      assert((await tokenInstance.balanceOf(accounts[0])).toNumber() === 10000 - 100);
+      assert((await tokenInstance.balanceOf(accounts[1])).toNumber() === 100);
+
+      const events = transferWatcher.get();
+
+      assert(events.length === 1);
+      assert(events[0].args.from === accounts[0]);
+      assert(events[0].args.to === accounts[1]);
+      assert(events[0].args.value.toNumber() === 100);
     });
   })
 });
