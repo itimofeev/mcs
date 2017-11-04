@@ -1,28 +1,34 @@
 const Number = artifacts.require('./Number.sol');
 
-const finney = 1000000000000000;
 const szabo = 1000000000000;
+const finney = 1000 * szabo;
 
 function getBalance(account, at) {
   return web3.eth.getBalance(account, at).toNumber();
-  // return web3.eth.getBalance(account, at);
+}
+
+function advTime(seconds) {
+  web3.currentProvider.send({ jsonrpc: "2.0", method: "evm_increaseTime", params: [seconds], id: 0 });
 }
 
 contract('Number', accounts => {
   it('Should be deployed', async () => {
-    assert(await Number.deployed())
+    assert(await Number.deployed());
   });
 
   describe('Number interaction', async () => {
     let numberInstance;
-    beforeEach(async () => numberInstance = await Number.deployed());
+    beforeEach(async () => {
+      numberInstance = await Number.deployed();
+      await advTime(10 * 60);
+    });
 
     it('Should set number', async () => {
-      assert((await numberInstance.number()).toNumber() === 0);
+      assert((await numberInstance.getNumber()).toNumber() === 0);
 
       assert(await numberInstance.setNumber(777, { value: finney }));
 
-      assert((await numberInstance.number()).toNumber() === 777);
+      assert((await numberInstance.getNumber()).toNumber() === 777);
     });
 
     it('Should fail if not enough value sent', async () => {
@@ -45,6 +51,21 @@ contract('Number', accounts => {
 
       assert(originalBalance0 + 2 * finney === finalBalance0);
       assert(finalBalance1 < originalBalance1 - 2 * finney);// < instead = because we spent some gas
+    });
+
+    it('Should reserve message to 10 minutes', async () => {
+      assert(await numberInstance.setNumber(777, { from: accounts[1], value: 2 * finney }));
+
+      try {
+        await numberInstance.setNumber(777, { from: accounts[1], value: 2 * finney })
+      } catch (e) {
+        // it's ok because we try to set number before reserve time passed
+      }
+
+      advTime(10 * 60);
+
+      await numberInstance.setNumber(888, { from: accounts[1], value: 2 * finney });
+      assert((await numberInstance.getNumber()).toNumber() === 888);
     })
   })
 });
