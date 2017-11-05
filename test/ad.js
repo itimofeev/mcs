@@ -68,6 +68,18 @@ contract('Ad', accounts => {
 
       await adInstance.publishAd("PreICO", { from: accounts[1], value: 2 * finney });
       assert.strictEqual(await adInstance.getAd(), "PreICO");
+    });
+
+    it('Shoud fire event when ad publisged', async () => {
+      const adWatcher = adInstance.AdPublished()
+
+      await adInstance.publishAd("event should be fired", { from: accounts[1], value: finney });
+
+      const events = adWatcher.get();
+
+      assert.lengthOf(events, 1);
+      assert.strictEqual(events[0].args.sender, accounts[1])
+      assert.strictEqual(events[0].args.ad, "event should be fired")
     })
   })
 });

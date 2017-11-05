@@ -14,6 +14,8 @@ contract AdService {
 
 	uint public unlockTime;
 
+	event AdPublished(address sender, string ad);
+
 	function AdService() public {
 		owner = msg.sender;
 		unlockTime = now;
@@ -36,6 +38,8 @@ contract AdService {
 
 		// Level 1 show ad through public accessor getAd
 		ad = _ad;
+
+		AdPublished(msg.sender, ad);
 	}
 
 	function getAd() constant public returns (string) {
