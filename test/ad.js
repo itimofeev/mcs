@@ -44,14 +44,15 @@ contract('Ad', accounts => {
     it('Should send money to owner', async () => {
       const originalBalance0 = await getBalance(accounts[0]);
       const originalBalance1 = await getBalance(accounts[1]);
+      const price = (await adInstance.getPrice()).toNumber();
 
-      await adInstance.publishAd("take part in ICO", { from: accounts[1], value: 2 * finney });
+      await adInstance.publishAd("take part in ICO", { from: accounts[1], value: 2 * price });
 
       const finalBalance0 = await getBalance(accounts[0]);
       const finalBalance1 = await getBalance(accounts[1]);
 
-      assert.strictEqual(originalBalance0 + 2 * finney, finalBalance0);
-      assert.isBelow(finalBalance1, originalBalance1 - 2 * finney);// not strict equal because of tx fee
+      assert.strictEqual(originalBalance0 + price, finalBalance0);
+      assert.isBelow(finalBalance1, originalBalance1 - price);// not strict equal because of tx fee
     });
 
     it('Should reserve message to 10 minutes', async () => {
