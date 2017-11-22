@@ -1,0 +1,25 @@
+{
+  "name": "mcs1",
+  "version": "1.0.0",
+  "description": "Домашка по курсу blockchain от moscowcoding",
+  "main": "truffle.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/itimofeev/mcs.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/itimofeev/mcs/issues"
+  },
+  "homepage": "https://github.com/itimofeev/mcs#readme",
+  "dependencies": {
+    "zeppelin-solidity": "^1.3.0"
+  }
+}
